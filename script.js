@@ -15,9 +15,9 @@
   const LANE_CENTER = 1;
   const LANE_RIGHT = 2;
 
-  const BASE_SPEED = 720;
-  const MAX_SPEED = 1850;
-  const ACCELERATION = 8.5; // Speed increase per second
+  const BASE_SPEED = 500;
+  const MAX_SPEED = 1000;
+  const ACCELERATION = 2.5; // Speed increase per second
   const GRAVITY = 1500;
   const JUMP_VELOCITY = 620;
 
@@ -105,7 +105,7 @@
 
   // Power-up configurations
   const POWERUP_TYPES = {
-    SHIELD: { id: 'shield', name: 'Shield', duration: 12, color: '#00f5d4', icon: '🛡️' },
+    SHIELD: { id: 'shield', name: 'Shield', duration: 10000000000, color: '#00f5d4', icon: '🛡️' },
     MAGNET: { id: 'magnet', name: 'Coin Magnet', duration: 10, color: '#ff007f', icon: '🧲' },
     RUSH: { id: 'rush', name: 'Jungle Rush', duration: 7, color: '#ffbe0b', icon: '⚡' },
     MULTIPLIER: { id: 'multiplier', name: '2X Score', duration: 14, color: '#38b000', icon: '✖️2' },
