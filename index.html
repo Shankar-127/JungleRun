@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="Jungle Run: Run Beyond the Ruins - A fast-paced, 3D endless runner browser game inspired by classic temple adventures. Dodge obstacles, grab gold, and survive the ancient ruins.">
+  <meta name="theme-color" content="#081c15">
+  <title>Jungle Run | Run Beyond the Ruins</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Main Game Container -->
+  <main id="game-app" class="game-container" role="application" aria-label="Jungle Run Game">
+    
+    <!-- Render Canvas -->
+    <canvas id="game-canvas" aria-label="Game viewport"></canvas>
+
+    <!-- In-Game HUD Overlay -->
+    <section id="hud" class="hud-overlay ui-layer hidden" aria-label="Game HUD">
+      <!-- Top HUD Stats -->
+      <div class="hud-top-bar">
+        <!-- Coin Counter -->
+        <div class="hud-stat hud-coins glass-panel" aria-live="polite">
+          <span class="hud-icon coin-icon" aria-hidden="true">🪙</span>
+          <div class="hud-text-group">
+            <span class="hud-label">COINS</span>
+            <span id="hud-coin-count" class="hud-value">0</span>
+          </div>
+        </div>
+
+        <!-- Score & Multiplier -->
+        <div class="hud-stat hud-score glass-panel">
+          <div class="hud-text-group center">
+            <span class="hud-label">SCORE</span>
+            <span id="hud-score-count" class="hud-value score-highlight">000000</span>
+          </div>
+          <div id="hud-multiplier-badge" class="multiplier-badge hidden">2X BOOST</div>
+        </div>
+
+        <!-- Distance & Speed -->
+        <div class="hud-stat hud-distance glass-panel">
+          <div class="hud-text-group right">
+            <span class="hud-label">DISTANCE</span>
+            <span id="hud-distance-count" class="hud-value">0 m</span>
+          </div>
+          <button id="btn-hud-pause" class="icon-button pause-btn" title="Pause Game (P)" aria-label="Pause Game">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+              <rect x="5" y="4" width="4" height="16" rx="1.5"></rect>
+              <rect x="15" y="4" width="4" height="16" rx="1.5"></rect>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Biome Notification Banner -->
+      <div id="biome-banner" class="biome-banner hidden">
+        <span id="biome-name">ANCIENT TEMPLE</span>
+      </div>
+
+      <!-- Active Power-up Timers Tray -->
+      <div id="hud-powerups" class="hud-powerups-tray" aria-label="Active Powerups">
+        <!-- Dynamic power-up badges inserted here by script -->
+      </div>
+
+      <!-- Mobile Touch On-Screen Controls (Configurable via Settings) -->
+      <div id="touch-controls" class="touch-controls-layer" aria-label="Touch Controls">
+        <div class="touch-dpad">
+          <button id="touch-left" class="touch-btn" aria-label="Move Left">◀</button>
+          <button id="touch-right" class="touch-btn" aria-label="Move Right">▶</button>
+        </div>
+        <div class="touch-actions">
+          <button id="touch-jump" class="touch-btn action-jump" aria-label="Jump">▲ JUMP</button>
+          <button id="touch-slide" class="touch-btn action-slide" aria-label="Slide">▼ SLIDE</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Start / Main Menu Screen -->
+    <section id="screen-menu" class="screen-overlay active" aria-label="Main Menu">
+      <div class="menu-decorations" aria-hidden="true">
+        <div class="sunbeam sunbeam-1"></div>
+        <div class="sunbeam sunbeam-2"></div>
+        <div class="mist-layer"></div>
+      </div>
+
+      <div class="menu-content glass-card">
+        <header class="title-header">
+          <div class="title-tag">ENDLESS RUNNER EXPEDITION</div>
+          <h1 class="game-title">JUNGLE RUN</h1>
+          <p class="game-subtitle">Run Beyond the Ruins</p>
+        </header>
+
+        <div class="menu-high-score">
+          <span class="trophy-icon">🏆</span>
+          <span>BEST EXPEDITION: <strong id="menu-high-score-val">0</strong> PTS</span>
+        </div>
+
+        <nav class="menu-buttons" aria-label="Main Navigation">
+          <button id="btn-play" class="primary-btn btn-cta">
+            <span class="btn-icon">▶</span>
+            <span class="btn-text">START EXPEDITION</span>
+            <span class="btn-shine"></span>
+          </button>
+          <button id="btn-how-to-play" class="secondary-btn">
+            <span class="btn-icon">❓</span>
+            <span class="btn-text">HOW TO PLAY</span>
+          </button>
+          <div class="btn-row">
+            <button id="btn-leaderboard" class="secondary-btn flex-1">
+              <span class="btn-icon">🏆</span>
+              <span class="btn-text">RECORDS</span>
+            </button>
+            <button id="btn-settings" class="secondary-btn flex-1">
+              <span class="btn-icon">⚙</span>
+              <span class="btn-text">SETTINGS</span>
+            </button>
+          </div>
+        </nav>
+
+        <footer class="menu-footer">
+          <div class="quick-controls-hint">
+            <span>Desktop: <strong>A/D</strong> or <strong>←/→</strong> to Dodge • <strong>W/Space</strong> to Jump • <strong>S</strong> to Slide</span>
+            <span>Mobile: <strong>Swipe</strong> in any direction</span>
+          </div>
+        </footer>
+      </div>
+    </section>
+
+    <!-- Pause Menu Screen -->
+    <section id="screen-pause" class="screen-overlay hidden" aria-label="Pause Menu">
+      <div class="menu-content glass-card pause-card">
+        <h2 class="screen-heading">GAME PAUSED</h2>
+        <p class="pause-desc">The jungle waits for no one...</p>
+
+        <div class="pause-stats-summary">
+          <div class="pause-stat-item">
+            <span class="stat-lbl">CURRENT SCORE</span>
+            <span id="pause-score-val" class="stat-num">0</span>
+          </div>
+          <div class="pause-stat-item">
+            <span class="stat-lbl">COINS GRABBED</span>
+            <span id="pause-coins-val" class="stat-num">0</span>
+          </div>
+        </div>
+
+        <div class="menu-buttons">
+          <button id="btn-resume" class="primary-btn">
+            <span class="btn-icon">▶</span>
+            <span class="btn-text">RESUME (P)</span>
+          </button>
+          <button id="btn-pause-restart" class="secondary-btn">
+            <span class="btn-icon">🔄</span>
+            <span class="btn-text">RESTART RUN</span>
+          </button>
+          <button id="btn-pause-settings" class="secondary-btn">
+            <span class="btn-icon">⚙</span>
+            <span class="btn-text">SETTINGS</span>
+          </button>
+          <button id="btn-pause-menu" class="secondary-btn danger">
+            <span class="btn-icon">🏠</span>
+            <span class="btn-text">EXIT TO MENU</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Game Over Screen -->
+    <section id="screen-game-over" class="screen-overlay hidden" aria-label="Game Over Screen">
+      <div class="menu-content glass-card game-over-card">
+        <!-- New High Score Banner -->
+        <div id="high-score-banner" class="high-score-badge hidden">
+          <span class="sparkle">✨</span> NEW PERSONAL BEST! <span class="sparkle">✨</span>
+        </div>
+
+        <h2 class="screen-heading game-over-title">EXPEDITION FAILED</h2>
+        <p id="game-over-cause" class="game-over-reason">Lost to the ancient perils of the temple</p>
+
+        <!-- Stats Grid -->
+        <div class="stats-board">
+          <div class="stat-box primary-stat">
+            <span class="stat-title">FINAL SCORE</span>
+            <span id="go-final-score" class="stat-digits highlight">0</span>
+          </div>
+          <div class="stats-row">
+            <div class="stat-box">
+              <span class="stat-title">DISTANCE</span>
+              <span id="go-distance" class="stat-digits">0 m</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-title">COINS</span>
+              <span id="go-coins" class="stat-digits">0</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-title">BEST SCORE</span>
+              <span id="go-high-score" class="stat-digits">0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="menu-buttons">
+          <button id="btn-play-again" class="primary-btn btn-cta">
+            <span class="btn-icon">🔄</span>
+            <span class="btn-text">RUN AGAIN (R)</span>
+            <span class="btn-shine"></span>
+          </button>
+          <div class="btn-row">
+            <button id="btn-go-leaderboard" class="secondary-btn flex-1">
+              <span class="btn-icon">🏆</span>
+              <span class="btn-text">RECORDS</span>
+            </button>
+            <button id="btn-go-menu" class="secondary-btn flex-1">
+              <span class="btn-icon">🏠</span>
+              <span class="btn-text">MAIN MENU</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How To Play / Tutorial Modal -->
+    <section id="modal-how-to-play" class="modal-backdrop hidden" aria-modal="true" role="dialog" aria-labelledby="htp-title">
+      <div class="modal-window glass-card">
+        <header class="modal-header">
+          <h2 id="htp-title" class="modal-title">SURVIVAL GUIDE</h2>
+          <button id="btn-close-htp" class="icon-button close-btn" aria-label="Close Guide">✕</button>
+        </header>
+
+        <div class="modal-body">
+          <div class="guide-grid">
+            <div class="guide-item">
+              <div class="guide-badge-visual">
+                <span class="key-cap">A</span> / <span class="key-cap">D</span>
+                <span class="guide-or">OR</span>
+                <span class="swipe-hint">SWIPE ◄ / ►</span>
+              </div>
+              <div class="guide-info">
+                <h3>Change Lanes</h3>
+                <p>Switch between the 3 path lanes to dodge boulders, totem pillars, and spikes.</p>
+              </div>
+            </div>
+
+            <div class="guide-item">
+              <div class="guide-badge-visual">
+                <span class="key-cap">W</span> / <span class="key-cap">SPACE</span>
+                <span class="guide-or">OR</span>
+                <span class="swipe-hint">SWIPE ▲</span>
+              </div>
+              <div class="guide-info">
+                <h3>Jump Over Hazards</h3>
+                <p>Leap over fallen logs, fire cauldrons, spike beds, and dangerous bridge chasms.</p>
+              </div>
+            </div>
+
+            <div class="guide-item">
+              <div class="guide-badge-visual">
+                <span class="key-cap">S</span> / <span class="key-cap">▼</span>
+                <span class="guide-or">OR</span>
+                <span class="swipe-hint">SWIPE ▼</span>
+              </div>
+              <div class="guide-info">
+                <h3>Slide Under Barriers</h3>
+                <p>Slide beneath ancient iron portcullises, hanging temple vines, and overhead temple gates.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="powerups-guide">
+            <h3 class="subheading">ANCIENT RELICS & POWER-UPS</h3>
+            <div class="powerup-cards">
+              <div class="powerup-card">
+                <span class="p-icon" style="color: #00f5d4;">🛡️</span>
+                <strong>SHIELD</strong>
+                <p>Absorbs 1 lethal impact without ending your run.</p>
+              </div>
+              <div class="powerup-card">
+                <span class="p-icon" style="color: #ff007f;">🧲</span>
+                <strong>COIN MAGNET</strong>
+                <p>Draws all nearby gold medallions directly to you.</p>
+              </div>
+              <div class="powerup-card">
+                <span class="p-icon" style="color: #ffbe0b;">⚡</span>
+                <strong>JUNGLE RUSH</strong>
+                <p>Blazing warp sprint + complete invulnerability.</p>
+              </div>
+              <div class="powerup-card">
+                <span class="p-icon" style="color: #38b000;">✖️2</span>
+                <strong>DOUBLE SCORE</strong>
+                <p>Multiplies all earned distance and coin points.</p>
+              </div>
+              <div class="powerup-card">
+                <span class="p-icon" style="color: #9d4edd;">⏳</span>
+                <strong>CHRONO SLOW</strong>
+                <p>Slows obstacles giving you matrix-like reaction time.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <footer class="modal-footer">
+          <button id="btn-start-from-guide" class="primary-btn w-100">
+            <span class="btn-text">I'M READY TO RUN!</span>
+          </button>
+        </footer>
+      </div>
+    </section>
+
+    <!-- Settings Modal -->
+    <section id="modal-settings" class="modal-backdrop hidden" aria-modal="true" role="dialog" aria-labelledby="settings-title">
+      <div class="modal-window glass-card">
+        <header class="modal-header">
+          <h2 id="settings-title" class="modal-title">EXPEDITION SETTINGS</h2>
+          <button id="btn-close-settings" class="icon-button close-btn" aria-label="Close Settings">✕</button>
+        </header>
+
+        <div class="modal-body settings-list">
+          <!-- Sound FX -->
+          <div class="setting-row">
+            <div class="setting-desc">
+              <label for="toggle-sfx" class="setting-name">Sound Effects (SFX)</label>
+              <span class="setting-sub">Footsteps, jumps, coin chimes, impacts</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="toggle-sfx" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <!-- Ambient Music -->
+          <div class="setting-row">
+            <div class="setting-desc">
+              <label for="toggle-music" class="setting-name">Tribal Atmosphere (BGM)</label>
+              <span class="setting-sub">Atmospheric synth & tribal rhythm generator</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="toggle-music" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <!-- Graphics Quality -->
+          <div class="setting-row">
+            <div class="setting-desc">
+              <label for="select-graphics" class="setting-name">Visual Quality</label>
+              <span class="setting-sub">Adjust particle density and ambient effects</span>
+            </div>
+            <select id="select-graphics" class="form-select">
+              <option value="high" selected>Ultra / High (60 FPS)</option>
+              <option value="medium">Balanced / Medium</option>
+              <option value="low">Performance / Low</option>
+            </select>
+          </div>
+
+          <!-- On-screen Touch Controls -->
+          <div class="setting-row">
+            <div class="setting-desc">
+              <label for="toggle-touch-pad" class="setting-name">On-Screen Touch Buttons</label>
+              <span class="setting-sub">Show mobile buttons in addition to swipe gestures</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="toggle-touch-pad">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <!-- Haptics / Vibration -->
+          <div class="setting-row">
+            <div class="setting-desc">
+              <label for="toggle-vibration" class="setting-name">Haptic Feedback</label>
+              <span class="setting-sub">Vibrate device on jumps, coins & crashes</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="toggle-vibration" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <footer class="modal-footer">
+          <button id="btn-save-settings" class="primary-btn w-100">
+            <span class="btn-text">SAVE & CLOSE</span>
+          </button>
+        </footer>
+      </div>
+    </section>
+
+    <!-- Leaderboard Modal -->
+    <section id="modal-leaderboard" class="modal-backdrop hidden" aria-modal="true" role="dialog" aria-labelledby="leaderboard-title">
+      <div class="modal-window glass-card">
+        <header class="modal-header">
+          <h2 id="leaderboard-title" class="modal-title">HALL OF EXPLORERS</h2>
+          <button id="btn-close-leaderboard" class="icon-button close-btn" aria-label="Close Leaderboard">✕</button>
+        </header>
+
+        <div class="modal-body">
+          <div class="leaderboard-table-container">
+            <table class="leaderboard-table">
+              <thead>
+                <tr>
+                  <th>RANK</th>
+                  <th>SCORE</th>
+                  <th>DISTANCE</th>
+                  <th>COINS</th>
+                  <th>DATE</th>
+                </tr>
+              </thead>
+              <tbody id="leaderboard-body">
+                <!-- Dynamically populated from localStorage -->
+              </tbody>
+            </table>
+          </div>
+          <p id="leaderboard-empty" class="leaderboard-empty hidden">No expeditions recorded yet. Step into the jungle!</p>
+        </div>
+
+        <footer class="modal-footer flex-row">
+          <button id="btn-clear-records" class="secondary-btn danger">RESET RECORDS</button>
+          <button id="btn-close-records" class="primary-btn flex-1">CLOSE</button>
+        </footer>
+      </div>
+    </section>
+
+    <!-- First-Time Tutorial Floating Prompt -->
+    <aside id="tutorial-floating-hint" class="tutorial-overlay hidden" aria-live="assertive">
+      <div class="tutorial-box glass-card">
+        <div class="tutorial-icon-pulse">🎮</div>
+        <div class="tutorial-text">
+          <h4 id="tutorial-step-title">SWIPE OR USE ARROWS</h4>
+          <p id="tutorial-step-desc">Dodge left or right to avoid hazards!</p>
+        </div>
+        <button id="btn-dismiss-tutorial" class="tutorial-ack-btn">GOT IT</button>
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- Game Logic -->
+  <script src="script.js"></script>
+</body>
+</html>
