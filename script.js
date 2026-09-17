@@ -192,7 +192,7 @@
       if (!this.sfxEnabled || !this.ctx) return;
       try {
         const now = Date.now();
-        if (now - this.coinComboTimer < 700) {
+        if (now - this.coinComboTimer < 100000000) {
           this.coinCombo++;
         } else {
           this.coinCombo = 0;
